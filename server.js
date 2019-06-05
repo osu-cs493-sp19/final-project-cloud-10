@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const { rateLimit } = require('./lib/rateLimiting');
 
 const api = require('./api');
 
@@ -11,9 +12,9 @@ const port = process.env.PORT || 8000;
  * Morgan is a popular logger.
  */
 app.use(morgan('dev'));
-
 app.use(bodyParser.json());
 app.use(express.static('public'));
+app.use(rateLimit);
 
 /*
  * All routes for the API are written in modules in the api/ directory.  The

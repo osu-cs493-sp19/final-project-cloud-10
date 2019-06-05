@@ -12,6 +12,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
+      REDIS_HOST: redis
 
   mysql:
     image: mysql:5
@@ -24,6 +25,12 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
 
 volumes:
   mysql-data:
