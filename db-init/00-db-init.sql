@@ -43,7 +43,7 @@ INSERT INTO `users` VALUES
   (0,'Danh Nguyen','greatness@gmail.com','$2y$08$p8Fyw0NRXqZtGqLi1zDsyuXqkU4tnbE/E4tp9ooCHjKCaQbMnWlKe','admin'),
   (1,'Rob Hess','professor@gmail.com','$2y$08$p0qrYN5fbBiGZq0nVwPBoO/AQvl2PKTiN7f8f/y3gyAp.iKL2nRdW','instructor'),
   (2,'Joshual Bell','modernnerd@gmail.com','$2y$08$YsvHwuhyDgh31Tn1PFkUmuA7Npkrktn10rKJDthkmWCH6VKER1C0q','student'),
-  (3,'Allen Moore','sendit@gmail.com','$2y$08$zlwX/xRvUkhfpUNQUusBl.wNgKjiyfZWkhc3YAGoaJ5ZfxW9BKdpO','student'),
+  (3,'Arlen Moore','sendit@gmail.com','$2y$08$zlwX/xRvUkhfpUNQUusBl.wNgKjiyfZWkhc3YAGoaJ5ZfxW9BKdpO','student'),
   (4,'Marshellus Kelly','ronaldosenior@gmail.com','$2y$08$mj1OGTOLdLInYM4wwW6VHO7rgNod3tG.uk50LghN2VNQb3R78yY82','student'),
   (5,'Arash Temehchy','termehca@eecs.oregonstate.edu','$2y$08$/p0TAjtQCpx/1t7spxdbr.CmCqoJsYbR2eda1.381n4lTNB2DB3dG','instructor');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
