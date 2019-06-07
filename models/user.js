@@ -64,6 +64,7 @@ function getUserById (id) {
     );
   });
 }
+exports.getUserById = getUserById;
 
 function getStudentCourses (studentId) {
   return new Promise((resolve, reject) => {

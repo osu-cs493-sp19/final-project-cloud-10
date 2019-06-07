@@ -6,9 +6,53 @@ const CourseSchema = {
   number: { required: true },
   title: { required: true },
   term: { required: true },
-  instructorid: { required: true }
+  instructorId: { required: true }
 };
 exports.CourseSchema = CourseSchema;
+
+/*
+ * Executes a MySQL query to insert a new photo into the database.  Returns
+ * a Promise that resolves to the ID of the newly-created photo entry.
+ */
+function insertNewCourse(course) {
+  return new Promise((resolve, reject) => {
+    course = extractValidFields(course, CourseSchema);
+    course.id = null;
+    mysqlPool.query(
+      'INSERT INTO courses SET ?',
+      course,
+      (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.insertId);
+        }
+      }
+    );
+  });
+}
+exports.insertNewCourse = insertNewCourse;
+
+/*
+ * Executes a MySQL query to fetch a course by id.  Returns
+ * a Promise that resolves to this record.
+ */
+function getCourseById(id) {
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(
+      'SELECT * FROM courses WHERE id = ?',
+      [ id ],
+      (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results[0]);
+        }
+      }
+    );
+  });
+}
+exports.getCourseById= getCourseById;
 
 /*
  * Executes a MySQL query to fetch the total number of courses.  Returns
