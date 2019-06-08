@@ -2,8 +2,9 @@ const router = require('express').Router();
 
 const { validateAgainstSchema } = require('../lib/validation');
 const { generateAuthToken, requireAuthentication } = require('../lib/auth');
-const { CourseSchema, insertNewCourse, getCourseById, getCoursesPage } = require('../models/course');
+const { CourseSchema, insertNewCourse, replaceCourseById, getCourseById, deleteCourseById, getCoursesPage } = require('../models/course');
 const { getUserById } = require('../models/user');
+
 /*
  * Route to return a paginated list of courses.
  */
@@ -36,10 +37,7 @@ router.get('/', async (req, res) => {
  * Route to create a new course.
  */
 router.post('/', requireAuthentication, async (req, res) => {
-  console.log('****\n userrole: '  + JSON.stringify(req.user) + '\n****');
   const user = await getUserById(req.user.sub);
-  console.log('****\n user: '+JSON.stringify(user)+'\n****');
-  console.log('****\n req.body: '+JSON.stringify(req.body)+'\n****');
   if (user && req.user.role === 'admin') {  
     if (validateAgainstSchema(req.body, CourseSchema)) {
       try {
@@ -69,7 +67,7 @@ router.post('/', requireAuthentication, async (req, res) => {
 });
 
 /*
- * Route to fetch info about a specific photo.
+ * Route to fetch info about a specific course.
  */
 router.get('/:id', async (req, res, next) => {
   try {
@@ -86,4 +84,93 @@ router.get('/:id', async (req, res, next) => {
     });
   }
 });
+
+
+/*
+ * Route to update a course.
+ */
+router.patch('/:id', requireAuthentication, async (req, res, next) => {
+  try {
+    // make sure token is provided and is valid user
+    const user = await getUserById(req.user.sub);
+    if (user) {
+      try {
+        const id = parseInt(req.params.id);
+        const existingCourse = await getCourseById(id);
+        let isInstructor = (user.role === 'instructor' && existingCourse.instructorId === req.user.sub);
+        // check if user is admin or the instructor for the course
+        if (req.user.role === 'admin' || isInstructor) {
+          if (existingCourse) {
+            const updateSuccessful = await replaceCourseById(id, req.body);
+            if (updateSuccessful) {
+              res.status(200).send({
+                links: {
+                  course: `/courses/${id}`
+                }
+              });
+            } else {
+              next();
+            }
+          } else {
+            next();
+          }
+        } else {
+          res.status(403).send({
+            error: "Unauthorized to access the specified resource"
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({
+          error: "Unable to update course.  Please try again later."
+        });
+      }
+    } else {
+      next();
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(403).send({
+      error: "Unauthorized to access the specified resource"
+    });
+  }
+});
+
+/*
+ * Route to delete a course.
+ */
+router.delete('/:id', requireAuthentication, async (req, res, next) => {
+  const user = await getUserById(req.user.sub);
+
+  try {
+    const course = await getCourseById(parseInt(req.params.id));
+    let isInstructor = (req.user.role === 'instructor' && course.instructorId === req.user.sub); 
+    if (user && (req.user.role === 'admin' || isInstructor)) {
+      try {
+        const deleteSuccessful = await deleteCourseById(parseInt(req.params.id));
+        if (deleteSuccessful) {
+          console.log('DELETED course: ' + course.title);
+          res.status(204).end();
+        } else {
+          next();
+        }
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({
+          error: "Unable to delete course.  Please try again later."
+        });
+      }
+    } else {
+      res.status(403).send({
+        error: "Unauthorized to delete the specified resource"
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      error: "Unable to fetch courses.  Please try again later."
+    });
+  }
+});
+
 module.exports = router;

@@ -11,6 +11,29 @@ const CourseSchema = {
 exports.CourseSchema = CourseSchema;
 
 /*
+ * Executes a MySQL query to replace a specified photo with new data.
+ * Returns a Promise that resolves to true if the photo specified by
+ * `id` existed and was successfully updated or to false otherwise.
+ */
+function replaceCourseById(id, course) {
+  return new Promise((resolve, reject) => {
+    course = extractValidFields(course, CourseSchema);
+    mysqlPool.query(
+      'UPDATE courses SET ? WHERE id = ?',
+      [ course, id ],
+      (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.affectedRows > 0);
+        }
+      }
+    );
+  });
+}
+exports.replaceCourseById = replaceCourseById;
+
+/*
  * Executes a MySQL query to insert a new photo into the database.  Returns
  * a Promise that resolves to the ID of the newly-created photo entry.
  */
@@ -72,6 +95,28 @@ function getCoursesCount() {
     );
   });
 }
+
+/*
+ * Executes a MySQL query to delete a course specified by its ID.  Returns
+ * a Promise that resolves to true if the course specified by `id`
+ * existed and was successfully deleted or to false otherwise.
+ */
+function deleteCourseById(id) {
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(
+      'DELETE FROM courses WHERE id = ?',
+      [ id ],
+      (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.affectedRows > 0);
+        }
+      }
+    );
+  });
+}
+exports.deleteCourseById = deleteCourseById;
 
 /*
  * Executes a MySQL query to return a single page of courses.  Returns a
