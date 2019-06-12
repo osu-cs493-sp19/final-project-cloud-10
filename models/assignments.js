@@ -10,9 +10,9 @@ const AssignmentSchema = {
 };
 exports.AssignmentSchema = AssignmentSchema;
 
-function insertNewAssignment(course) {
+function insertNewAssignment(assignment) {
     return new Promise((resolve, reject) => {
-      assignment = extractValidFields(course, AssignmentSchema);
+      assignment = extractValidFields(assignment, AssignmentSchema);
       assignment.id = null;
       mysqlPool.query(
         'INSERT INTO assignments SET ?',
@@ -61,3 +61,21 @@ function insertNewAssignment(course) {
     });
   }
   exports.getAssignmentById= getAssignmentById;
+
+  function updateAssignment(id, assignment) {
+    return new Promise((resolve, reject) => {
+      assignment = extractValidFields(assignment, AssignmentSchema);
+      mysqlPool.query(
+        'UPDATE assignments SET ? WHERE id = ?',
+        [ assignment, id ],
+        (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result.affectedRows > 0);
+          }
+        }
+      );
+    });
+  }
+  exports.updateAssignment = updateAssignment;

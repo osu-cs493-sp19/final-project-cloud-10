@@ -7,7 +7,8 @@ const {
     AssignmentSchema,
     insertNewAssignment,
     getAssignments,
-    getAssignmentById
+    getAssignmentById,
+    updateAssignment
     } = require('../models/assignments');
 const {
     getCourseById
@@ -30,6 +31,7 @@ router.get('/', async (req, res) => {
       });
     }
   });
+
 router.post('/', requireAuthentication, async (req, res) => {
     const user = await getUserById(req.user.sub);
     const course = await getCourseById(req.body.courseId)
@@ -80,6 +82,45 @@ router.post('/', requireAuthentication, async (req, res) => {
       console.error(err);
       res.status(404).send({
         error: "Specified Assignment $req.param.id not found."
+      });
+    }
+  });
+
+  router.patch('/:id', requireAuthentication, async (req, res) => {
+    const user = await getUserById(req.user.sub);
+    const assign = await getAssignmentById(req.params.id)
+    
+    const course = await getCourseById(assign.courseId)
+    //console.log(user);
+    //console
+   // console.log(assign);
+    console.log(course);
+    if (user && req.user.role === 'admin' || user && req.user.role === 'instructor' && user.id === course.instructorId){
+     // if (validateAgainstSchema(req.body, AssignmentSchema)) {
+      if (req.body.courseId || req.body.title || req.body.points || req.body.due) {
+        try {
+          const id = await updateAssignment(req.params.id, req.body);
+          console.log(assign);
+          res.status(201).send({
+            id: id,
+            links: {
+              assignment: `/assignments/${id}`
+            }
+          });
+        } catch (err) {
+          console.error(err);
+          res.status(500).send({
+            error: "Error inserting assignment into DB.  Please try again later."
+          });
+        }
+      } else {
+        res.status(400).send({
+          error: "Request body is not a valid assignment object"
+        });
+      }
+    } else {
+      res.status(403).send({
+        error: "Unauthorized to insert the specified resource"
       });
     }
   });
