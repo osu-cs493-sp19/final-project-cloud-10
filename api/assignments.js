@@ -6,7 +6,8 @@ const { generateAuthToken, requireAuthentication } = require('../lib/auth');
 const {
     AssignmentSchema,
     insertNewAssignment,
-    getAssignments
+    getAssignments,
+    getAssignmentById
     } = require('../models/assignments');
 const {
     getCourseById
@@ -69,16 +70,16 @@ router.post('/', requireAuthentication, async (req, res) => {
    */
   router.get('/:id', async (req, res, next) => {
     try {
-      const course = await getCourseById(parseInt(req.params.id));
-      if (course) {
-        res.status(200).send(course);
+      const assignment = await getAssignmentById(parseInt(req.params.id));
+      if (assignment) {
+        res.status(200).send(assignment);
       } else {
         next();
       }
     } catch (err) {
       console.error(err);
-      res.status(500).send({
-        error: "Unable to fetch course.  Please try again later."
+      res.status(404).send({
+        error: "Specified Assignment $req.param.id not found."
       });
     }
   });

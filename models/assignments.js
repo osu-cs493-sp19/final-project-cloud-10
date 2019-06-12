@@ -44,3 +44,20 @@ function insertNewAssignment(course) {
     });
   }
   exports.getAssignments= getAssignments;
+
+  function getAssignmentById(id) {
+    return new Promise((resolve, reject) => {
+      mysqlPool.query(
+        'SELECT * FROM assignments WHERE id = ?',
+        [ id ],
+        (err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results[0]);
+          }
+        }
+      );
+    });
+  }
+  exports.getAssignmentById= getAssignmentById;
