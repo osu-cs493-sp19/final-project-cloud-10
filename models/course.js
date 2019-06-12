@@ -155,3 +155,28 @@ function getCoursesPage(page) {
   });
 }
 exports.getCoursesPage = getCoursesPage;
+
+
+/*
+ * Returns list of student IDs of students enrolled in given course
+ */
+function getCourseEnrollments(id) {
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(
+      'SELECT studentId FROM enrollments WHERE courseId = ?',
+      [ id ],
+      (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          let studArr = [];
+          for (var i of results) {
+            studArr.push(i.studentId);
+          }
+          resolve(studArr);
+        }
+      }
+    );
+  });
+}
+exports.getCourseEnrollments = getCourseEnrollments;

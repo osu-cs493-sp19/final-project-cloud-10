@@ -2,7 +2,14 @@ const router = require('express').Router();
 
 const { validateAgainstSchema } = require('../lib/validation');
 const { generateAuthToken, requireAuthentication } = require('../lib/auth');
-const { CourseSchema, insertNewCourse, replaceCourseById, getCourseById, deleteCourseById, getCoursesPage } = require('../models/course');
+const {
+  CourseSchema,
+  insertNewCourse,
+  replaceCourseById,
+  getCourseById,
+  deleteCourseById,
+  getCoursesPage,
+  getCourseEnrollments } = require('../models/course');
 const { getUserById } = require('../models/user');
 
 /*
@@ -171,6 +178,37 @@ router.delete('/:id', requireAuthentication, async (req, res, next) => {
       error: "Unable to fetch courses.  Please try again later."
     });
   }
+});
+
+/*
+ * Route to fetch a list of the students enrolled in the Course.
+ */
+router.get('/:id/students', requireAuthentication, async (req, res, next) => {
+  try {
+    let course = await getCourseById(parseInt(req.params.id));
+    if (req.user != null && (req.user.role == "admin" || req.user.sub == course.instructorId)) {
+      
+        const id = parseInt(req.params.id);
+        result = await getCourseEnrollments(id);
+        if (result) {
+          console.log(result);
+          res.status(200).send({
+            students: result
+          });
+        } else {
+          res.status(404).send({
+            error: "Specified course if not found"
+          });
+        }
+      } else {
+        res.status(403).send("The request was made by an unauthorized user");
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({
+        error: "Unable to fetch course.  Please try again later."
+      });
+    }
 });
 
 module.exports = router;
