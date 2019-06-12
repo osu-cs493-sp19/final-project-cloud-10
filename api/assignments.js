@@ -8,6 +8,9 @@ const {
     insertNewAssignment,
     getAssignments
     } = require('../models/assignments');
+const {
+    getCourseById
+    } = require('../models/course');
 const { getUserById } = require('../models/user');
 
 router.get('/', async (req, res) => {
@@ -28,7 +31,11 @@ router.get('/', async (req, res) => {
   });
 router.post('/', requireAuthentication, async (req, res) => {
     const user = await getUserById(req.user.sub);
-    if (user){
+    const course = await getCourseById(req.body.courseId)
+    //console.log(user);
+    //console.log(req.body);
+    //console.log(course);
+    if (user && req.user.role === 'admin' || user && req.user.role === 'instructor' && user.id === course.instructorId){
      // if (validateAgainstSchema(req.body, AssignmentSchema)) {
       if (req.body.courseId && req.body.title && req.body.points && req.body.due) {
         try {
@@ -47,7 +54,7 @@ router.post('/', requireAuthentication, async (req, res) => {
         }
       } else {
         res.status(400).send({
-          error: "Request body is not a valid course object"
+          error: "Request body is not a valid assignment object"
         });
       }
     } else {
