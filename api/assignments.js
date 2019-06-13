@@ -1,4 +1,24 @@
 const router = require('express').Router();
+const multer = require('multer');
+const crypto = require('crypto');
+
+const assignmentTypes = {
+    'assignment/pdf': 'pdf',
+  };
+
+  const upload = multer({
+    storage: multer.diskStorage({
+      destination: `${__dirname}/uploads`,
+      filename: (req, file, callback) => {
+        const basename = crypto.pseudoRandomBytes(16).toString('hex');
+        const extension = assigmentTypes[file.mimetype];
+        callback(null, `${basename}.${extension}`);
+      }
+    }),
+    fileFilter: (req, file, callback) => {
+      callback(null, !!assignmentTypes[file.mimetype])
+    }
+  });
 
 const { validateAgainstSchema } = require('../lib/validation');
 const { generateAuthToken, requireAuthentication } = require('../lib/auth');
@@ -95,14 +115,15 @@ router.post('/', requireAuthentication, async (req, res) => {
     //console.log(user);
     //console
    // console.log(assign);
-    console.log(course);
+    //console.log(course);
     if (user && req.user.role === 'admin' || user && req.user.role === 'instructor' && user.id === course.instructorId){
      // if (validateAgainstSchema(req.body, AssignmentSchema)) {
+    if(assign){
       if (req.body.courseId || req.body.title || req.body.points || req.body.due) {
         try {
           const id = await updateAssignment(req.params.id, req.body);
           console.log(assign);
-          res.status(201).send({
+          res.status(200).send({
             id: id,
             links: {
               assignment: `/assignments/${id}`
@@ -111,12 +132,17 @@ router.post('/', requireAuthentication, async (req, res) => {
         } catch (err) {
           console.error(err);
           res.status(500).send({
-            error: "Error inserting assignment into DB.  Please try again later."
+            error: "Error updating assignment in DB.  Please try again later."
           });
         }
       } else {
         res.status(400).send({
           error: "Request body is not a valid assignment object"
+        });
+      }
+    }else {
+        res.status(404).send({
+          error: "Specified assignment id not found"
         });
       }
     } else {
@@ -159,5 +185,6 @@ router.delete('/:id', requireAuthentication, async (req, res) => {
       });
     }
   });
+
 
   module.exports = router;
