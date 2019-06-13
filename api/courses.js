@@ -9,7 +9,10 @@ const {
   getCourseById,
   deleteCourseById,
   getCoursesPage,
-  getCourseEnrollments } = require('../models/course');
+  getCourseEnrollments,
+  enrollStudent,
+  unenrollStudent,
+  getStudentInfo } = require('../models/course');
 const { getUserById } = require('../models/user');
 
 /*
@@ -191,10 +194,80 @@ router.get('/:id/students', requireAuthentication, async (req, res, next) => {
         const id = parseInt(req.params.id);
         result = await getCourseEnrollments(id);
         if (result) {
-          console.log(result);
           res.status(200).send({
             students: result
           });
+        } else {
+          res.status(404).send({
+            error: "Specified course if not found"
+          });
+        }
+      } else {
+        res.status(403).send("The request was made by an unauthorized user");
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({
+        error: "Unable to fetch course.  Please try again later."
+      });
+    }
+});
+
+router.post('/:id/students', requireAuthentication, async (req, res, next) => {
+  if (req.user != null && (req.user.role == "admin" || req.user.sub == course.instructorId)) {
+    try {
+      if (req.body.add || req.body.remove) {
+        let cid = parseInt(req.params.id);
+        let additions = req.body.add;
+        let removals = req.body.remove;
+        // Enroll students
+        if (additions) {
+          for (let i of additions) {
+            console.log("Enrolling", i, "in", cid);
+            await enrollStudent(i, cid);
+          }
+        }
+        // Unenroll students
+        if (removals) {
+          for (let i of removals) {
+            console.log("Unenrolling", i, "from", cid);
+            await unenrollStudent(i, cid);
+          }
+        }
+        res.status(200).send("Success");
+      } else {
+        res.status(400).send("The request body was either not present or did not contain the appropriate fields.");
+      }
+    } catch (err) {
+      console.error(err);
+        res.status(500).send({
+          error: "Unable to update enrollments.  Please try again later."
+        });
+    }
+  } else {
+    res.status(403).send({
+      error: "The request was made by an unauthorized user"
+    });
+  }
+});
+
+/*
+ * Route to fetch a csv list of the students enrolled in the Course.
+ */
+router.get('/:id/roster', requireAuthentication, async (req, res, next) => {
+  try {
+    if (req.user != null && (req.user.role == "admin" || req.user.sub == course.instructorId)) {
+      
+        const id = parseInt(req.params.id);
+        let studentIds = await getCourseEnrollments(id);
+        if (studentIds) {
+          let roster = "id, name, email\n";
+          for (let i of studentIds) {
+            let studInfo = await getStudentInfo(i);
+            roster = roster + studInfo.id + ", \"" + studInfo.name + "\", \"" + studInfo.email + "\"\n";
+          }
+            res.set('Content-Type', 'text/csv');
+            res.status(200).send(roster);
         } else {
           res.status(404).send({
             error: "Specified course if not found"

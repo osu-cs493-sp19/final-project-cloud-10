@@ -180,3 +180,66 @@ function getCourseEnrollments(id) {
   });
 }
 exports.getCourseEnrollments = getCourseEnrollments;
+
+/*
+ * Executes a MySQL query to delete the appropriate row of the 'enrollments' table.  Returns
+ * a Promise that resolves to true if the enrollment specified by the student id and the course id
+ * existed and was successfully deleted or to false otherwise.
+ */
+function unenrollStudent(sid, cid) {
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(
+      'DELETE FROM enrollments WHERE studentId = ? AND courseId = ?',
+      [ sid, cid ],
+      (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.affectedRows > 0);
+        }
+      }
+    );
+  });
+}
+exports.unenrollStudent = unenrollStudent;
+
+/*
+ * Executes a MySQL query to insert a new photo into the database.  Returns
+ * a Promise that resolves to the ID of the newly-created photo entry.
+ */
+function enrollStudent(sid, cid) {
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(
+      "INSERT INTO enrollments SET studentId = ?, courseId = ?, grades = 'A'",
+      [ sid, cid ],
+      (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+  });
+}
+exports.enrollStudent = enrollStudent;
+
+/*
+ * Returns student's name, ID, and email address
+ */
+function getStudentInfo(id) {
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(
+      'SELECT id, name, email FROM users WHERE id = ?',
+      [ id ],
+      (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results[0]);
+        }
+      }
+    );
+  });
+}
+exports.getStudentInfo = getStudentInfo;
