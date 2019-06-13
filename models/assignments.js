@@ -79,3 +79,20 @@ function insertNewAssignment(assignment) {
     });
   }
   exports.updateAssignment = updateAssignment;
+
+function deleteAssignmentById(id) {
+    return new Promise((resolve, reject) => {
+      mysqlPool.query(
+        'DELETE FROM assignments WHERE id = ?',
+        [ id ],
+        (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result.affectedRows > 0);
+          }
+        }
+      );
+    });
+  }
+  exports.deleteAssignmentById = deleteAssignmentById;
