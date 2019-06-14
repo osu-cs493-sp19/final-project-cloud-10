@@ -266,6 +266,7 @@ router.get('/:id/roster', requireAuthentication, async (req, res, next) => {
             let studInfo = await getStudentInfo(i);
             roster = roster + studInfo.id + ", \"" + studInfo.name + "\", \"" + studInfo.email + "\"\n";
           }
+            res.attachment('roster.csv');
             res.set('Content-Type', 'text/csv');
             res.status(200).send(roster);
         } else {
@@ -273,7 +274,7 @@ router.get('/:id/roster', requireAuthentication, async (req, res, next) => {
             error: "Specified course if not found"
           });
         }
-      } else {
+      }else {
         res.status(403).send("The request was made by an unauthorized user");
       }
     } catch (err) {
