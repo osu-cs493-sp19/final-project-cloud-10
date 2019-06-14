@@ -153,7 +153,8 @@ INSERT INTO `assignments` VALUES
   (2,0,'assignment3',100,'2019-05-20T23:59:00.000Z'),
   (3,1,'assignment1',100,'2019-04-22T23:59:00.000Z'),
   (4,1,'assignment2',100,'2019-05-13T23:59:00.000Z'),
-  (5,1,'assignment3',100,'2019-05-27T23:59:00.000Z');
+  (5,1,'assignment3',100,'2019-05-27T23:59:00.000Z'),
+  (6,0,'assingment4',100,'2019-06-16T06:59:00.000Z');
 /*!40000 ALTER TABLE `assignments` ENABLE KEYS */;
 UNLOCK TABLES;
 
